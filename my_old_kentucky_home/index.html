@@ -14,7 +14,8 @@
 <div id="lyrics"></div>
 
 <script>
-        function annotate () {
+	vid = document.getElementById("music_video");
+        vid.addEventListener("timeupdate", function (){
                 var image1 = document.createElement("img");
                 image1.src = "sun_shines.jpg";
                 image1.width = "250";
@@ -44,9 +45,7 @@
                         For My Old Kentucky Home<br />For My Old Kentucky Home,\
                          far away</p>"
                 }
-        }
-	vid = document.getElementById("music_video");
-        vid.addEventListener("timeupdate", annotate);
+        }, false);
 </script>
 </body>
 </html>
