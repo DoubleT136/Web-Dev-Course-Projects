@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>My Old Kentucky Home</title>
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+<h1 id="title">My Old Kentucky Home</h1>
+
+<video src="https://www.cs.tufts.edu/comp/20/my_old_kentucky_home.mp4" id="music_video" controls></video>
+<div id="lyrics"></div>
+
+<script>
+        function annotate () {
+                var image1 = document.createElement("img");
+                image1.src = "sun_shines.jpg";
+                image1.width = "250";
+                var image2 = document.createElement("img");
+                image2.src = "night.jpg";
+                image2.width = "250";
+                var time = vid.currentTime;
+                var lyrics = document.getElementById("lyrics");
+                if (time < 8) {
+                        lyrics.innerHTML = "<p>Prelude</p>"
+                } else if (time >= 8 && time <= 35) {
+                        lyrics.innerHTML = "<p>The sun shines bright in My Old \
+                        Kentucky Home,<br />'Tis summer, the people are gay; \
+                        <br />The corn-top's ripe and the meadow's in the \
+                        bloom<br />While the birds make music all the day.</p>"
+                        lyrics.appendChild(image1);
+                } else if (time >= 36 && time <= 63) {
+                        lyrics.innerHTML = "<p>The young folks roll on the \
+                        little cabin floor,<br />All merry, all happy and \
+                        bright;<br />By 'n' by hard times comes a knocking at \
+                        the door,<br />Then My Old Kentucky Home, good \
+                        night!</p>"
+                        lyrics.appendChild(image2);
+                } else if (time >= 64 && time <= 93) {
+                        lyrics.innerHTML = "<p>Weep no more my lady<br /> \
+                        Oh weep no more today;<br />We will sing one song<br />\
+                        For My Old Kentucky Home<br />For My Old Kentucky Home,\
+                         far away</p>"
+                }
+        }
+	vid = document.getElementById("music_video");
+        vid.addEventListener("timeupdate", annotate);
+</script>
+</body>
+</html>
