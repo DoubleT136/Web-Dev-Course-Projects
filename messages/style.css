@@ -1,1 +1,18 @@
-/* Your CSS here... */
+body {
+        background-color: #343434;
+}
+
+h1 {
+        color: #00BFFF;
+        font-size: 42px;
+        font-family: impact;
+        text-align: center;
+}
+
+#messages {
+        color: white;
+        background-color: #FA8072;
+        font-size: 20px;
+        font-family: helvetica;
+        text-align: center;
+}
