@@ -95,13 +95,15 @@ function render_map()
         my_marker = new google.maps.Marker({
                 position: mypos,
                 map: map,
-                title: "Login: KAYE_SCHMIDT <br/> Closet landmark: " +
-                data["landmarks"][cl]["properties"]["Location_Name"] +
-                "<br/>Distance away: " + closest_dist,
+                title: "Login: KAYE_SCHMIDT",
                 icon: 'me_icon.png'
         });
+        infowindow.setContent(my_marker.title);
+        infowindow.open(map, my_marker);
         google.maps.event.addListener(my_marker, 'click', function() {
-            infowindow.setContent(my_marker.title);
+            infowindow.setContent("Login: KAYE_SCHMIDT <br/> Closet landmark: "
+                + data["landmarks"][cl]["properties"]["Location_Name"] +
+                "<br/>Distance away: " + closest_dist);
             infowindow.open(map, my_marker);
             path = new google.maps.Polyline({
                     path: [{lat: myLat, lng: myLng}, {lat: data["landmarks"][cl]["geometry"]["coordinates"][1],
@@ -113,7 +115,6 @@ function render_map()
             });
             path.setMap(map);
         });
-
         marker.setMap(map);
 }
 
