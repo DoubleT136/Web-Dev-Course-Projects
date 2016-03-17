@@ -1,4 +1,4 @@
-function show_map()
+function init()
 {
         // When initiaing the map, default to Medford
         var init_pos = new google.maps.LatLng(42.4089325, -71.1196015);
@@ -7,7 +7,8 @@ function show_map()
                 center : init_pos,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
         };
-        map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+        map = new google.maps.Map(document.getElementById("map_canvas"),
+        myOptions);
         get_location();
 }
 
@@ -28,7 +29,6 @@ function get_location()
                                     200) {
                                             raw = request.responseText;
                                             data = JSON.parse(raw);
-                                            console.log(data);
                                             render_map();
                                     }
                         };
@@ -45,6 +45,8 @@ function render_map()
         infowindow = new google.maps.InfoWindow();
         mypos = new google.maps.LatLng(myLat, myLng);
         map.panTo(mypos);
+        closet_dist = 100;      // default to 100 miles
+
         for (i = 0; i < (data["landmarks"]).length; i++)
         {
                 var lat = data["landmarks"][i]["geometry"]["coordinates"][1];
@@ -56,8 +58,18 @@ function render_map()
                         title: data["landmarks"][i]["properties"]["Details"],
                         icon: 'hist_icon.jpg'
                 });
+                var tmp_dist =
+                haversineDistance(
+                        [data["landmarks"][i]["geometry"]["coordinates"][0],
+                         data["landmarks"][i]["geometry"]["coordinates"][1]],
+                         [myLng, myLat], true);
+                if (tmp_dist < closet_dist) {
+                        closet_dist = tmp_dist;
+                        closest_landmark = i;
+                }
                 showInfoWindow(marker, map, infowindow);
         }
+
         for (i = 0; i < (data["people"]).length; i++)
         {
                 var lat = data["people"][i]["lat"];
@@ -65,7 +77,7 @@ function render_map()
                 var pos = new google.maps.LatLng(lat, lng);
                 var info = data["people"][i]["login"] + "<br/> Distance away: "
                            + haversineDistance([lng, lat], [myLng, myLat], true)
-                           + " miles"
+                           + " miles";
                 marker = new google.maps.Marker({
                         position: pos,
                         map: map,
@@ -74,16 +86,34 @@ function render_map()
                 });
                 showInfoWindow(marker, map, infowindow);
         }
+
+        cl = closest_landmark;       // done to shorten function calls below
+        closest_dist =
+        haversineDistance([data["landmarks"][cl]["geometry"]["coordinates"][0],
+        data["landmarks"][cl]["geometry"]["coordinates"][1]], [myLng, myLat],
+        true);
         my_marker = new google.maps.Marker({
                 position: mypos,
                 map: map,
-                title: "Login: KAYE_SCHMIDT",
+                title: "Login: KAYE_SCHMIDT <br/> Closet landmark: " +
+                data["landmarks"][cl]["properties"]["Location_Name"] +
+                "<br/>Distance away: " + closest_dist,
                 icon: 'me_icon.png'
         });
         google.maps.event.addListener(my_marker, 'click', function() {
             infowindow.setContent(my_marker.title);
             infowindow.open(map, my_marker);
+            path = new google.maps.Polyline({
+                    path: [{lat: myLat, lng: myLng}, {lat: data["landmarks"][cl]["geometry"]["coordinates"][1],
+                    lng: data["landmarks"][cl]["geometry"]["coordinates"][0]}],
+                    geodesic: true,
+                    strokeColor: '#1CAC78',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 6
+            });
+            path.setMap(map);
         });
+
         marker.setMap(map);
 }
 
@@ -95,6 +125,7 @@ function showInfoWindow(marker, map, infowindow)
     });
 }
 
+// distance function copied from stackoverflow
 function haversineDistance(coords1, coords2, isMiles) {
   function toRad(x) {
     return x * Math.PI / 180;
@@ -111,14 +142,14 @@ function haversineDistance(coords1, coords2, isMiles) {
   var x1 = lat2 - lat1;
   var dLat = toRad(x1);
   var x2 = lon2 - lon1;
-  var dLon = toRad(x2)
+  var dLon = toRad(x2);
   var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
     Math.sin(dLon / 2) * Math.sin(dLon / 2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   var d = R * c;
 
-  if(isMiles) d /= 1.60934;
+  if(isMiles) { d /= 1.60934 };
 
-  return d.toFixed(2);
+  return d.toFixed(3);
 }
