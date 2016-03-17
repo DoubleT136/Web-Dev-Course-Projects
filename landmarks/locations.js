@@ -17,6 +17,22 @@ function get_location()
                 navigator.geolocation.getCurrentPosition(function(pos) {
                         myLat = pos.coords.latitude;
                         myLng = pos.coords.longitude;
+                        request = new XMLHttpRequest();
+                        request.open("POST",
+                        "https://defense-in-derpth.herokuapp.com/sendLocation",
+                        true);
+                        request.setRequestHeader("Content-type",
+                        "application/x-www-form-urlencoded");
+                        request.onreadystatechange = function() {
+                                if (request.readyState == 4 && request.status ==
+                                    200) {
+                                            raw = request.responseText;
+                                            data = JSON.parse(raw);
+                                            console.log(data);
+                                    }
+                        };
+                        request.send("login=KAYE_SCHMIDT&lat=" +
+                        myLat.toString() + "&lng=" + myLng.toString());
                         render_map();
                 });
         } else {
@@ -29,10 +45,19 @@ function render_map()
         infowindow = new google.maps.InfoWindow();
         mypos = new google.maps.LatLng(myLat, myLng);
         map.panTo(mypos);
-        marker = new google.maps.Marker({
+        marker[0] = new google.maps.Marker({
                 position: mypos,
                 title: "Your Current Location"
         });
+        for (i = 0; i < (data.landmarks).length; i++)
+        {
+                marker[i + 1] = new google.maps.Marker({
+                        position:
+                        google.maps.LatLng(data["landmarks"][i]["geomery"]["coordinates"][0],
+                        data["landmarks"][i]["geomery"]["coordinates"][1]),
+                        title:
+                });
+        }
         marker.setMap(map);
         google.maps.event.addListener(marker, 'click', function() {
                 infowindow.setContent(marker.title);
