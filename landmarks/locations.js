@@ -20,7 +20,7 @@ function get_location()
                         myLng = pos.coords.longitude;
                         request = new XMLHttpRequest();
                         request.open("POST",
-                        "https://defense-in-derpth.herokuapp.com/sendLocation",
+                        "https://fathomless-anchorage-58913.herokuapp.com/sendLocation",
                         true);
                         request.setRequestHeader("Content-type",
                         "application/x-www-form-urlencoded");
