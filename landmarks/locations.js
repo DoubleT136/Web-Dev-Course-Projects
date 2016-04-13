@@ -33,7 +33,7 @@ function get_location()
                                     }
                         };
                         request.send("login=KAYE_SCHMIDT&lat=" +
-                        myLat.toString() + "&lng=" + myLng.toString());
+                        myLat + "&lng=" + myLng);
                 });
         } else {
                 alert("Geolocation is not supported by your web browser.");
