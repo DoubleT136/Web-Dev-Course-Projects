@@ -32,8 +32,8 @@
 
                 <h3>2. HTML Injection</h3>
                 <p>Affects GET on the index page and the client-side web page</p>
-                <p>Severity: Medium (Security Issue)</p>
-                <p>Consequences: Similar to the XSS mentioned above, this vulnerability allows attackers to inject HTML elements and code into web pages through POST parameters, which will then be executed when a client accesses the index page and in the Google Maps API on the client-side.</p>
+                <p>Severity: High (Security Issue)</p>
+                <p>Consequences: Similar to the XSS mentioned above, this vulnerability allows attackers to inject HTML elements and code into web pages through POST parameters, which will then be executed when a client accesses the index page and in the Google Maps API on the client-side. Furthermore, malicious code can be embedded in pictures or other sources.</p>
                 <p>Example: Using the curl command "curl --data &quot;login=&lt;img src=&#39;https://i.imgflip.com/vw7te.jpg&#39;&gt;&amp;lng=-71.1200&amp;lat=42.40879&quot; http://thepowerfulsunblindsme.herokuapp.com/sendLocation" and then accessing the server index page shows this result:</p>
                 <p><img class ="pic" src="html_serverside.png" alt="HTML injection server side result" /></p>
                 <p>Accessing the client-side web page shows this:</p>
@@ -63,9 +63,41 @@
 
                 <h3>5. MongoLab username and password exposed</h3>
                 <p>Affects EVERYTHING, both client-side and server-side (Security Issue)</p>
-                <p>Severity: Very High</p>
+                <p>Severity: Low</p>
                 <p>Consequences: Allow attacker access to the database through mongo shell directly, allowing him to modify data stored, add new entries to the database, etc. </p>
                 <p>Example: In the screenshot below, I am showing a document I added in a collection that I created, as well as the userdata collection:</p>
                 <p><img class ="pic" src="mongo_exposed.png" alt="Directly using mongo shell example" /></p>
+                <p>In index.js, line 11, the mongoUri is an absolute Uri typed in plain text, showing the username and passowrd of the database to anyone who can acess this file. In addition, there is also a mysterious file mongouri.txt that contains the same information. But since only people who can access the index.js file has access to this, I have decided to rate the severity as low. I found this vulnerability when looking at source code.</p>
+                <p>Solution: Remove mongouri.txt and use process.env.MONGOLAB_URI to store mongouri instead of plain text.</p>
+
+                <h3>6. Flooding Google Maps with marker</h3>
+                <p>Affects client-side (Security Issue)</p>
+                <p>Severity: Low</p>
+                <p>Consequences: A large number of markers concentrated in a small region on Google Maps can conver the whole map and obstruct the proper function of the website.</p>
+                <p>Example: Using the following shell script, I was able to achieve the results below.</p>
+                <p>#!/bin/bash<br />
+                lng_range=$(awk &#39;BEGIN{for(i=-71.1214;i&lt;=-71.1189;i+=0.0001)print i}&#39;)<br />
+                lat_range=$(awk &#39;BEGIN{for(i=42.4063;i&lt;=42.4089;i+=0.0001)print i}&#39;)<br />
+                for lng in $lng_range<br />
+                do<br />
+                        for lat in $lat_range<br />
+                        do<br />
+                                curl --data<br /> &quot;login=lol&amp;lng=$lng&amp;lat=$lat&quot; http://thepowerfulsunblindsme.herokuapp.com/sendLocation
+                        done<br />
+                done<br /></p>
+                <p><img class ="pic" src="flooded.png" alt="Flooding Google Maps with Markers" /></p>
+                <p>Since there is no authentication nor does the web app keep track of number of checkins from a specific device, there is nothing preventing a malicious attacker from flooding the database with checkins and render the Google Maps API useless.</p>
+                <p>Solution: This is beyond the scope of the assignments, but implementing a check that makes sure one device (IP adress) from sending too many requests or setting up an authentication process would both work.</p>
+
+                <h3>7. Intercepting communication</h3>
+                <p>Affects both client-side and server-side</p>
+                <p>Severity: High</p>
+                <p>Consequences: An attacker can intercept the request and responses between client, server, and the database. Then, the attacker can change the information contained and send the incorrect information.</p>
+                <p>Example: Unfortunately, due to time constraints, I was not able to figure out how to actually accomplish this. Thus, this is purely theoretical</p>
+                <p>Because all information is sent through http, not https, and the different components are not on the same local network, the packets can be intercepted and changed by someone who has access to the networks where each component is located.</p>
+                <p>Solution: Send information through https or set up all components on the same network (not possible within the scope of the assignment).</p>
+
+                <h2>Conclusion</h2>
+                <p>After examining my partner's web applications, I have found the above listed issues. Fortunately, most of them are easy to change by just adding a few lines of code. But, a truly secure web app would require authentication to connect and all its components would be contained on one network, with any unavoidable external communication going through https.</p>
         </body>
 </html>
