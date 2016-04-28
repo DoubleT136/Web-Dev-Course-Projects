@@ -14,7 +14,7 @@
                 <p>In this assessment, I consider security issues as issues that distrupt the intended operations of the web applications, and I consider privacy issues as issues where information that should be hidden is exposed.</p>
 
                 <h2>Methodology</h2>
-                <p>I first performed "black-box" testing on the both sides of the assignment using curl and my browser, testing for obvious vulnerabilities and "curling" all kinds of invalid requests. Then, I tried scanning the website with a vulnerability scanner, OWSAP ZAP. Finally, I reviewed my partner's server-side source code and performed further "white-box" testing.</p>
+                <p>I first performed "black-box" testing on the both sides of the assignment using curl and my browser, testing for obvious vulnerabilities and "curling" all kinds of invalid requests. Then, I tried scanning the website with a vulnerability scanner, OWSAP ZAP. Unfortunately, ZAP only returned three issues, all of which did not really matter for this assignment (ex. clickjacking). Finally, I reviewed my partner's server-side source code and performed further "white-box" testing.</p>
 
                 <h2>Abstraction of findings</h2>
                 <p>Most of the issues found are casued by blindly trusting user input without first verifying it. These vulnerabilities can have a range of effects on both the server-side web application, including exposing all user data, changing the behaviour of the website, and outright crashing the server. In turn, this can affect the client-side by displaying the wrong information or refusing to connect.</p>
