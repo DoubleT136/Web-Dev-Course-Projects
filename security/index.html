@@ -47,15 +47,25 @@
                 <p>Consequences: Anyone is able to access the checkin information of all users through /checkins.json, which is abolutely not the intended behaviour and a huge privacy issue.</p>
                 <p>Example: By entering "http://thepowerfulsunblindsme.herokuapp.com/checkins.json?login[$ne]=" in any browser, attacker is able to get all checkins without actually needing any logins. The result is as follows:</p>
                 <p><img class ="pic" src="nosql.png" alt="NOSQL injection result" /></p>
-                <p>This is caused because of the way /checkins.json is implemented. In line 68 of index.js, the query "db.collection(&#39;userdata&#39;).find({login:userLogin})" gets interpreted as "db.collection(&#39;userdata&#39;).find({login:{$ne:&quot;&quot;}})" with the request shown in the example, thus it will return all entrys where the login is not empty. I found this by messing with the query input, and consulting Ming (and his video at DEFCON).</p>
+                <p>This is exploit is because of the way mongodb queries are handled. In line 68 of index.js, the query "db.collection(&#39;userdata&#39;).find({login:userLogin})" gets interpreted as "db.collection(&#39;userdata&#39;).find({login:{$ne:&quot;&quot;}})" with the request shown in the example, thus it will return all entrys where the login is not empty. I found this by messing with the query input, and consulting Ming (and his video at DEFCON).</p>
                 <p>Solution: To avoid queries like this, the query has to be sanitized beforehand, either using a regular expression similar to the ones above or an outside library.</p>
 
-                <h4>4. Server crash on invalid JSON</h4>
+                <h3>4. Server crash on invalid JSON</h3>
                 <p>Affects EVERYTHING, both client-side and server-side (Security Issue)</p>
                 <p>Severity: Very High</p>
-                <p>Consequences: Upon sending TWO POST requests in a row (For unknown reasons, one request will not work) containing invalid JSON parameters (lat=,), the web application crashes and trying to interact with it in anyway gives an Application Error. This persists until a server reboot (or around 30 mins on heroku).</p>
+                <p>Consequences: Upon sending TWO POST requests in a row (For unknown reasons, one request will not work) containing invalid JSON parameters (lat=,), the web application crashes and trying to interact with it in anyway gives an Application Error. As a result, the client-side fails to work properly as well. This persists until a server reboot (or around 30 mins on heroku). </p>
                 <p>Example: Sending two curl requests as follows results in the behavior shown below:</p>
                 <p><img class ="pic" src="json_post.png" alt="Invalid JSON example" /></p>
                 <p><img class ="pic" src="json_get.png" alt="Invalid JSON result" /></p>
+                <p>Interestingly enough, this is NOT because of not sanitizing user input. Instead it is because of a bug in my partner's code. In line 31 and 32 in index.js, he uses parseFloat() when parsing the lng and lat, which returns NaN if it detects a char that is not a digit. However, later he queries the db with these parameters in line 45 and 49. The query functions return an err upon seeing NaN, and my partner was smart to check for err. However, in line 46 and 56 when he checks for error and sends a response, the program continues after the if statement, thus it ends up trying to send two responses. Since this is illegal, the web server crashes. I found this when trying different curl commands.</p>
+                <p>Solution: Simply modify the code and wrap everything after the if(err) statments in else statements as follows:</p>
+                <p><img class ="pic" src="json_fix.png" alt="Invalid JSON fix" /></p>
+
+                <h3>5. MongoLab username and password exposed</h3>
+                <p>Affects EVERYTHING, both client-side and server-side (Security Issue)</p>
+                <p>Severity: Very High</p>
+                <p>Consequences: Allow attacker access to the database through mongo shell directly, allowing him to modify data stored, add new entries to the database, etc. </p>
+                <p>Example: In the screenshot below, I am showing a document I added in a collection that I created, as well as the userdata collection:</p>
+                <p><img class ="pic" src="mongo_exposed.png" alt="Directly using mongo shell example" /></p>
         </body>
 </html>
